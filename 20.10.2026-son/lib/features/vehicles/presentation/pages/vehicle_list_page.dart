@@ -6,6 +6,7 @@ import '../../../../core/widgets/app_empty_state.dart';
 import '../../../../core/widgets/demo_notice_banner.dart';
 import '../../../../core/widgets/responsive_wrap.dart';
 import '../controllers/vehicle_controller.dart';
+import '../widgets/sahibinden_filter_sheet.dart';
 import '../widgets/vehicle_card.dart';
 import '../widgets/vehicle_filter_bar.dart';
 
@@ -21,6 +22,11 @@ class VehicleListPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Araçlar'),
         actions: [
+          IconButton(
+            tooltip: 'Sahibinden Detaylı Filtre (Depo, Yıl, Mod)',
+            onPressed: () => SahibindenFilterSheet.show(context, controller),
+            icon: const Icon(Icons.tune),
+          ),
           ListenableBuilder(
             listenable: controller,
             builder: (context, _) => IconButton(
@@ -82,11 +88,21 @@ class _Results extends StatelessWidget {
             const VehicleFilterBar(),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-              child: Text(
-                '${vehicles.length} araç bulundu',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${vehicles.length} araç bulundu',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => SahibindenFilterSheet.show(context, controller),
+                    icon: const Icon(Icons.tune, size: 16),
+                    label: const Text('Sahibinden Filtresi'),
+                  ),
+                ],
               ),
             ),
             AnimatedSwitcher(

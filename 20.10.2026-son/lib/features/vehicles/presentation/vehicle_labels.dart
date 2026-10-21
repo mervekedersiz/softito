@@ -29,5 +29,9 @@ extension FuelTypeLabel on FuelType {
 extension VehicleCategoryLabel on VehicleCategory {
   String get label => switch (this) {
     VehicleCategory.car => 'Binek araç',
+    VehicleCategory.electricSuv => 'Elektrikli SUV',
+    VehicleCategory.scooter => 'E-Scooter',
+    VehicleCategory.eBike => 'E-Bisiklet',
+    VehicleCategory.camperVan => 'Karavan & Ticari',
   };
 }

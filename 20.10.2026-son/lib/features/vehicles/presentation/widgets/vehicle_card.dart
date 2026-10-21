@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-
-import '../../../../core/utils/formatters.dart';
+import '../../../../app/app_scope.dart';
 import '../../../../core/widgets/app_vehicle_image.dart';
 import '../../domain/entities/vehicle.dart';
 import '../pages/vehicle_detail_page.dart';
 import 'availability_badge.dart';
 import 'favorite_button.dart';
+import 'fuel_gauge_widget.dart';
 import 'spec_chip.dart';
 
-/// Gallery card: image with price tag and favorite button, then specs.
-///
-/// [heroTag] must be unique per screen so list → detail Hero animations
-/// never collide with the same vehicle shown elsewhere.
+/// Gallery card: image with dynamic currency price tag, favorite button, and "Depoyu söylüyor" status.
 class VehicleCard extends StatelessWidget {
   const VehicleCard({required this.vehicle, required this.heroTag, super.key});
 
@@ -30,6 +27,7 @@ class VehicleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final currency = AppScope.of(context).currency;
 
     return Card(
       child: InkWell(
@@ -57,7 +55,12 @@ class VehicleCard extends StatelessWidget {
                 Positioned(
                   left: 12,
                   bottom: 12,
-                  child: _PriceTag(price: vehicle.dailyPrice),
+                  child: ListenableBuilder(
+                    listenable: currency,
+                    builder: (context, _) => _PriceTag(
+                      formattedPrice: currency.format(vehicle.dailyPrice),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -66,11 +69,27 @@ class VehicleCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          vehicle.name,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: colors.onSurface,
+                          ),
+                        ),
+                      ),
+                      // "Depoyu Söylüyor" Compact Badge
+                      FuelGaugeWidget(vehicle: vehicle, compact: true),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
                   Text(
-                    vehicle.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: colors.onSurface,
+                    '${vehicle.modelYear} • ${vehicle.bodyType} • ${vehicle.locationDistrict}',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -88,9 +107,9 @@ class VehicleCard extends StatelessWidget {
 }
 
 class _PriceTag extends StatelessWidget {
-  const _PriceTag({required this.price});
+  const _PriceTag({required this.formattedPrice});
 
-  final int price;
+  final String formattedPrice;
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +127,7 @@ class _PriceTag extends StatelessWidget {
           TextSpan(
             children: [
               TextSpan(
-                text: formatLira(price),
+                text: formattedPrice,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: colors.onSurface,

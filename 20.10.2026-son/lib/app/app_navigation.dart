@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/feedback/app_feedback.dart';
 import '../features/bookings/presentation/pages/my_bookings_page.dart';
 import '../features/favorites/presentation/pages/favorites_page.dart';
 import '../features/home/presentation/pages/home_page.dart';
@@ -11,7 +12,8 @@ import 'app_scope.dart';
 /// Width from which the bottom bar is replaced by a side [NavigationRail].
 const double _railBreakpoint = 840;
 
-/// Main scaffold hosting the navigation and the five tab pages.
+/// Main scaffold hosting the navigation and the five tab pages,
+/// along with the global on-screen feedback banner.
 class AppShell extends StatelessWidget {
   const AppShell({super.key});
 
@@ -20,10 +22,11 @@ class AppShell extends StatelessWidget {
     final deps = AppScope.of(context);
 
     return ListenableBuilder(
-      listenable: Listenable.merge([deps.tab, deps.bookings]),
+      listenable: Listenable.merge([deps.tab, deps.bookings, deps.feedback]),
       builder: (context, _) {
         final current = deps.tab.value;
         final bookingCount = deps.bookings.bookings.length;
+        final feedback = deps.feedback.current;
         void select(int index) => deps.tab.value = AppDestination.values[index];
 
         Widget icon(AppDestination d, {required bool selected}) {
@@ -40,6 +43,20 @@ class AppShell extends StatelessWidget {
             MyBookingsPage(),
             FavoritesPage(),
             ProfilePage(),
+          ],
+        );
+
+        Widget contentWithFeedback = Column(
+          children: [
+            if (feedback != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 40, 16, 0),
+                child: AppFeedbackBanner(
+                  feedback: feedback,
+                  onDismiss: deps.feedback.clear,
+                ),
+              ),
+            Expanded(child: pages),
           ],
         );
 
@@ -63,13 +80,13 @@ class AppShell extends StatelessWidget {
                       ],
                     ),
                     const VerticalDivider(width: 1),
-                    Expanded(child: pages),
+                    Expanded(child: contentWithFeedback),
                   ],
                 ),
               );
             }
             return Scaffold(
-              body: pages,
+              body: contentWithFeedback,
               bottomNavigationBar: NavigationBar(
                 selectedIndex: current.index,
                 onDestinationSelected: select,

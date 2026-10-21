@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/utils/formatters.dart';
+import '../../../../app/app_scope.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/widgets/app_vehicle_image.dart';
 import '../../../../core/widgets/section_header.dart';
 import '../../../bookings/presentation/pages/booking_form_page.dart';
@@ -9,10 +10,11 @@ import '../vehicle_labels.dart';
 import '../widgets/availability_badge.dart';
 import '../widgets/availability_strip.dart';
 import '../widgets/favorite_button.dart';
+import '../widgets/fuel_gauge_widget.dart';
 import '../widgets/spec_chip.dart';
 
-/// Vehicle details with gallery image, specs, sample availability and the
-/// "Kirala" action.
+/// Vehicle details with gallery image, specs, "Depoyu Söylüyor" gauge,
+/// Sahibinden expert status, and instant rental / telemetry actions.
 class VehicleDetailPage extends StatelessWidget {
   const VehicleDetailPage({
     required this.vehicle,
@@ -35,6 +37,7 @@ class VehicleDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final currency = AppScope.of(context).currency;
 
     return Scaffold(
       appBar: AppBar(
@@ -71,37 +74,56 @@ class VehicleDetailPage extends StatelessWidget {
                   Expanded(
                     child: Semantics(
                       header: true,
-                      child: Text(
-                        vehicle.name,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            vehicle.name,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${vehicle.modelYear} • ${vehicle.locationDistrict} • ${vehicle.expertStatus}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        formatLira(vehicle.dailyPrice),
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          color: colors.primary,
-                          fontWeight: FontWeight.w800,
+                  ListenableBuilder(
+                    listenable: currency,
+                    builder: (context, _) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          currency.format(vehicle.dailyPrice),
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            color: colors.primary,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'günlük (demo fiyat)',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: colors.onSurfaceVariant,
+                        Text(
+                          'günlük (demo fiyat)',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: colors.onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
               AvailabilityBadge(isAvailable: vehicle.isAvailable),
+              const SizedBox(height: 16),
+              // "Depoyu Söylüyor" prominent visual component
+              FuelGaugeWidget(vehicle: vehicle),
               const SizedBox(height: 16),
               Text(vehicle.description, style: theme.textTheme.bodyLarge),
               const SizedBox(height: 24),
@@ -127,7 +149,51 @@ class VehicleDetailPage extends StatelessWidget {
                     icon: Icons.directions_car,
                     label: vehicle.category.label,
                   ),
+                  SpecChip(
+                    icon: Icons.speed,
+                    label: '${vehicle.mileageKm} km',
+                  ),
+                  SpecChip(
+                    icon: Icons.verified,
+                    label: vehicle.expertStatus,
+                  ),
                 ],
+              ),
+              const SizedBox(height: 24),
+              // Live Telemetry / Tracking Shortcut Card
+              Card(
+                color: colors.surfaceContainerHighest.withValues(alpha: 0.5),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      const CircleAvatar(
+                        backgroundColor: Colors.black87,
+                        child: Icon(Icons.radar, color: Colors.cyanAccent),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Canlı Telemetri & GPS Takip',
+                              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              'Gerçek zamanlı hız, harita ve kamera yayını simülatörü',
+                              style: theme.textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
+                            ),
+                          ],
+                        ),
+                      ),
+                      FilledButton.tonal(
+                        onPressed: () => AppRouter.pushLiveTracking(context),
+                        child: const Text('İzle'),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               const SizedBox(height: 24),
               const SectionHeader(title: 'Örnek müsaitlik (demo)'),
@@ -151,15 +217,32 @@ class VehicleDetailPage extends StatelessWidget {
             heightFactor: 1,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 720),
-              child: SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: vehicle.isAvailable ? () => _rent(context) : null,
-                  icon: Icon(vehicle.isAvailable ? Icons.key : Icons.block),
-                  label: Text(
-                    vehicle.isAvailable ? 'Kirala' : 'Şu an müsait değil',
+              child: Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: vehicle.isAvailable ? () => _rent(context) : null,
+                      icon: Icon(vehicle.isAvailable ? Icons.key : Icons.block),
+                      label: Text(
+                        vehicle.isAvailable ? 'Kirala' : 'Şu an müsait değil',
+                      ),
+                    ),
                   ),
-                ),
+                  if (vehicle.isAvailable) ...[
+                    const SizedBox(width: 10),
+                    IconButton.filledTonal(
+                      tooltip: 'Doğrudan Kredi Kartı ile Öde',
+                      icon: const Icon(Icons.credit_card),
+                      onPressed: () {
+                        AppRouter.pushPayment(
+                          context,
+                          vehicle: vehicle,
+                          totalAmountTry: vehicle.dailyPrice,
+                        );
+                      },
+                    ),
+                  ],
+                ],
               ),
             ),
           ),
