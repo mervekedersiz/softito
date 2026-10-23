@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/habits/presentation/pages/habit_detail_page.dart';
 import '../../features/habits/presentation/pages/spiritual_page.dart';
 import '../../features/habits/presentation/pages/study_page.dart';
+import '../../features/onboarding/presentation/login_page.dart';
 import '../../features/onboarding/presentation/onboarding_page.dart';
 import '../../features/progress/presentation/pages/progress_page.dart';
 import '../../features/rewards/presentation/pages/rewards_page.dart';
@@ -38,6 +39,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       if (bootstrapState is BootstrapNeedsOnboarding) {
+        if (currentLoc == RoutePaths.login) return null;
         return currentLoc == RoutePaths.onboarding
             ? null
             : RoutePaths.onboarding;
@@ -45,7 +47,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       if (bootstrapState is BootstrapReady) {
         if (currentLoc == RoutePaths.bootstrap ||
-            currentLoc == RoutePaths.onboarding) {
+            currentLoc == RoutePaths.onboarding ||
+            currentLoc == RoutePaths.login) {
           final prefs = ref.read(preferencesStoreProvider);
           return prefs.defaultSection == 'spiritual'
               ? RoutePaths.spiritual
@@ -63,6 +66,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RoutePaths.onboarding,
         builder: (context, state) => const OnboardingPage(),
+      ),
+      GoRoute(
+        path: RoutePaths.login,
+        builder: (context, state) => const LoginPage(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

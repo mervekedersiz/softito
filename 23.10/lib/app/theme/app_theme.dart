@@ -8,6 +8,8 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
+      fontFamily: 'Roboto',
+      fontFamilyFallback: const ['Roboto', 'NotoColorEmoji', 'Apple Color Emoji', 'Arial'],
       scaffoldBackgroundColor: colorScheme.surface,
       appBarTheme: AppBarTheme(
         backgroundColor: colorScheme.surface,
@@ -95,6 +97,8 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
+      fontFamily: 'Roboto',
+      fontFamilyFallback: const ['Roboto', 'NotoColorEmoji', 'Apple Color Emoji', 'Arial'],
       scaffoldBackgroundColor: colorScheme.surface,
       appBarTheme: AppBarTheme(
         backgroundColor: colorScheme.surface,

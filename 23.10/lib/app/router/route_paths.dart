@@ -6,4 +6,5 @@ class RoutePaths {
   static const String rewards = '/kendime-zaman';
   static const String habitDetail = '/habits/:id';
   static const String progress = '/progress';
+  static const String login = '/login';
 }

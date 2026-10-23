@@ -234,11 +234,15 @@ class _HabitFormSheetState extends State<HabitFormSheet> {
                   Expanded(
                     child: DropdownButtonFormField<HabitCategory>(
                       initialValue: _category,
+                      isExpanded: true,
                       decoration: const InputDecoration(labelText: 'Bölüm'),
                       items: HabitCategory.values.map((cat) {
                         return DropdownMenuItem(
                           value: cat,
-                          child: Text('${cat.defaultEmoji} ${cat.displayName}'),
+                          child: Text(
+                            '${cat.defaultEmoji} ${cat.displayName}',
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         );
                       }).toList(),
                       onChanged: (val) {
@@ -261,9 +265,13 @@ class _HabitFormSheetState extends State<HabitFormSheet> {
               const SizedBox(height: 14),
               DropdownButtonFormField<HabitTargetType>(
                 initialValue: _targetType,
+                isExpanded: true,
                 decoration: const InputDecoration(labelText: 'Hedef Türü'),
                 items: HabitTargetType.values.map((t) {
-                  return DropdownMenuItem(value: t, child: Text(t.displayName));
+                  return DropdownMenuItem(
+                    value: t,
+                    child: Text(t.displayName, overflow: TextOverflow.ellipsis),
+                  );
                 }).toList(),
                 onChanged: (val) {
                   if (val != null) {
@@ -318,13 +326,17 @@ class _HabitFormSheetState extends State<HabitFormSheet> {
               const SizedBox(height: 16),
               Text('Tekrar Günleri', style: theme.textTheme.labelMedium),
               const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
                 children: List.generate(7, (i) {
                   final dayIndex = i + 1;
                   final isSelected = _selectedWeekdays.contains(dayIndex);
                   return FilterChip(
-                    label: Text(weekdayNames[i]),
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    label: Text(weekdayNames[i], style: const TextStyle(fontSize: 12)),
                     selected: isSelected,
                     onSelected: (selected) {
                       setState(() {
