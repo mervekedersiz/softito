@@ -1,0 +1,50 @@
+import 'package:proje/models/kategori.dart';
+
+class Urun {
+  final String id;
+  final String baslik;
+  final String aciklama;
+  final double fiyat;
+  final String resimUrl;
+  final Kategori kategori;
+  final int stokAdedi;
+  final bool favoriMi;
+
+  const Urun({
+    required this.id,
+    required this.baslik,
+    required this.aciklama,
+    required this.fiyat,
+    required this.resimUrl,
+    required this.kategori,
+    required this.stokAdedi,
+    this.favoriMi = false,
+  });
+
+  Urun copyWith({
+    String? id,
+    String? baslik,
+    String? aciklama,
+    double? fiyat,
+    String? resimUrl,
+    Kategori? kategori,
+    int? stokAdedi,
+    bool? favoriMi,
+  }) {
+    return Urun(
+      id: id ?? this.id,
+      baslik: baslik ?? this.baslik,
+      aciklama: aciklama ?? this.aciklama,
+      fiyat: fiyat ?? this.fiyat,
+      resimUrl: resimUrl ?? this.resimUrl,
+      kategori: kategori ?? this.kategori,
+      stokAdedi: stokAdedi ?? this.stokAdedi,
+      favoriMi: favoriMi ?? this.favoriMi,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'Urun(id: $id, baslik: $baslik, aciklama: $aciklama, fiyat: $fiyat, resimUrl: $resimUrl, kategori: $kategori, stokAdedi: $stokAdedi, favoriMi: $favoriMi)';
+  }
+}
